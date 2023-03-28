@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..utils import get_n_classes, label_to_onehot, onehot_to_label
+from ..utils import get_n_classes, label_to_onehot, onehot_to_label, accuracy_fn
 
 
 class LogisticRegression(object):
@@ -20,6 +20,10 @@ class LogisticRegression(object):
         self.lr = lr
         self.max_iters = max_iters
 
+        ## OTHER ARGUMENTS
+        self.weights
+
+         
     def fit(self, training_data, training_labels):
         """
         Trains the model, returns predicted labels for training data.
@@ -35,6 +39,7 @@ class LogisticRegression(object):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
+        self.weights = self.logistic_regression_train_multi(training_data, training_labels, self.max_iters, self.lr)
         return self.predict(training_data)
 
     def predict(self, test_data):
@@ -51,4 +56,43 @@ class LogisticRegression(object):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
-        return pred_labels
+        return self.logistic_regression_predict_multi(test_data, self.weights)
+
+    
+    # METHODS FOR MULTI-CLASS LOGISTIC REGRESSION
+
+    def f_softmax(data, W):
+        expxw = np.exp(data@W)
+        sum = np.reshape(np.sum(expxw, axis=1), (-1, 1))
+        return expxw/sum
+    
+
+    def loss_logistic_multi(self, data, labels, w):
+        return -np.sum(labels*np.log(self.f_softmax(data, w)))
+    
+
+    def gradient_logistic_multi(self, data, labels, W):
+        return np.transpose(data)@(self.f_softmax(data, W) - labels)
+    
+
+    def logistic_regression_predict_multi(self, data, W):
+        proba = self.f_softmax(data, W)
+        indices = np.argmax(proba, axis=1)
+        return indices
+    
+
+    def logistic_regression_train_multi(self, data, labels, max_iters=10, lr=0.001):
+        
+        D = data.shape[1]  # number of features
+        C = labels.shape[1]  # number of classes
+        # Random initialization of the weights
+        weights = np.random.normal(0, 0.1, (D, C))
+        for it in range(max_iters):
+            gradient = self.gradient_logistic_multi(data, labels, weights)
+            weights -= lr*gradient
+
+            predictions = self.logistic_regression_predict_multi(data, weights)
+            if accuracy_fn(predictions, onehot_to_label(labels)) == 100:
+                break
+                
+        return weights
