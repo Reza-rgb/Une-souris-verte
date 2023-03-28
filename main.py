@@ -10,8 +10,7 @@ from src.methods.kmeans import KMeans
 from src.methods.logistic_regression import LogisticRegression
 from src.methods.svm import SVM
 from src.utils import normalize_fn, append_bias_term, accuracy_fn, macrof1_fn
-
-
+ 
 def main(args):
     """
     The main function of the script. Do not hesitate to play with it
