@@ -23,11 +23,13 @@ class SVM(object):
             degree (int): degree in polynomial SVM method
             coef0 (float): coef0 in polynomial SVM method
         """
-        ##
-        ###
-        #### WRITE YOUR CODE HERE! 
-        ###
-        ##
+
+        self.C = C
+        self.kernel = kernel
+        self.gamma = gamma
+        self.degree = degree
+        self.coef0 = coef0
+        self.svc = SVC(C=self.C, kernel=self.kernel, degree=self.degree, gamma=self.gamma, coef0=self.coef0)
         
     def fit(self, training_data, training_labels):
         """
@@ -39,11 +41,9 @@ class SVM(object):
         Returns:
             pred_labels (array): target of shape (N,)
         """
-        ##
-        ###
-        #### WRITE YOUR CODE HERE! 
-        ###
-        ##
+
+        self.svc.fit(training_data, training_labels)
+
         return self.predict(training_data)
     
     def predict(self, test_data):
@@ -55,9 +55,7 @@ class SVM(object):
         Returns:
             pred_labels (array): labels of shape (N,)
         """
-        ##
-        ###
-        #### WRITE YOUR CODE HERE! 
-        ###
-        ##
+
+        pred_labels = self.svc.predict(test_data)
+
         return pred_labels
