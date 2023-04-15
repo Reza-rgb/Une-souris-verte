@@ -62,11 +62,14 @@ def main(args):
     
     # Follow the "DummyClassifier" example for your methods
     if args.method == "dummy_classifier":
-        method_obj =  DummyClassifier(arg1=1, arg2=2)
+        method_obj = DummyClassifier(arg1=1, arg2=2)
 
-    ### WRITE YOUR CODE HERE
     elif args.method == "logistic_regression":  
         method_obj = LogisticRegression(lr = args.lr, max_iters = args.max_iters)
+
+    elif args.method == "svm":
+        method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
+        pass
     
 
     ## 4. Train and evaluate the method
