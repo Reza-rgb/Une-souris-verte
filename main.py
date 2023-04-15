@@ -52,8 +52,9 @@ def main(args):
     if args.method == "dummy_classifier":
         method_obj =  DummyClassifier(arg1=1, arg2=2)
 
-    elif ...:  ### WRITE YOUR CODE HERE
-        pass
+    ### WRITE YOUR CODE HERE
+    elif args.method == "logistic_regression":  
+        method_obj = LogisticRegression(lr = args.lr, max_iters = args.max_iters)
     
 
     ## 4. Train and evaluate the method

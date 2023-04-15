@@ -19,9 +19,8 @@ class LogisticRegression(object):
         """
         self.lr = lr
         self.max_iters = max_iters
-
+        
         ## OTHER ARGUMENTS
-        self.weights
 
          
     def fit(self, training_data, training_labels):
@@ -30,7 +29,7 @@ class LogisticRegression(object):
 
         Arguments:
             training_data (array): training data of shape (N,D)
-            training_labels (array): regression target of shape (N,)
+            training_label (array): regression target of shape (N,)
         Returns:
             pred_labels (array): target of shape (N,)
         """
@@ -39,7 +38,12 @@ class LogisticRegression(object):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
-        self.weights = self.logistic_regression_train_multi(training_data, training_labels, self.max_iters, self.lr)
+        self.C = get_n_classes(training_labels)
+        self.D = training_data.shape[1]
+
+        self.weights = self.logistic_regression_train_multi(training_data, 
+                                                            label_to_onehot(training_labels, self.C), 
+                                                            self.max_iters, self.lr)
         return self.predict(training_data)
 
     def predict(self, test_data):
@@ -61,14 +65,10 @@ class LogisticRegression(object):
     
     # METHODS FOR MULTI-CLASS LOGISTIC REGRESSION
 
-    def f_softmax(data, W):
+    def f_softmax(self, data, W):
         expxw = np.exp(data@W)
         sum = np.reshape(np.sum(expxw, axis=1), (-1, 1))
         return expxw/sum
-    
-
-    def loss_logistic_multi(self, data, labels, w):
-        return -np.sum(labels*np.log(self.f_softmax(data, w)))
     
 
     def gradient_logistic_multi(self, data, labels, W):
@@ -81,12 +81,10 @@ class LogisticRegression(object):
         return indices
     
 
-    def logistic_regression_train_multi(self, data, labels, max_iters=10, lr=0.001):
+    def logistic_regression_train_multi(self, data, labels, max_iters, lr):
         
-        D = data.shape[1]  # number of features
-        C = labels.shape[1]  # number of classes
         # Random initialization of the weights
-        weights = np.random.normal(0, 0.1, (D, C))
+        weights = np.random.normal(0, 0.1, (self.D, self.C))
         for it in range(max_iters):
             gradient = self.gradient_logistic_multi(data, labels, weights)
             weights -= lr*gradient
