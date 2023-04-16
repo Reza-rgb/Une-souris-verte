@@ -29,14 +29,26 @@ def main(args):
     ## 2. Then we must prepare it. This is were you can create a validation set,
     #  normalize, add bias, etc.
 
+
+    # TODO: Normalization of the data
+
+
+    # Suffle of the training data
+    indices = np.random.permutation(xtrain.shape[0])
+    xtrain, ytrain = xtrain[indices, :], ytrain[indices]
+
+
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
-        ### WRITE YOUR CODE HERE
-        pass
+        ratio = 0.8
+        N = xtrain.shape[0]
+        limit = (int) (ratio * N)
+        
+        xtrain, xvalid = xtrain[:limit, :], xtrain[limit:, :]
+        ytrain, yvalid = ytrain[:limit], ytrain[limit:]
+
+        
     
-    ### WRITE YOUR CODE HERE to do any other data processing
-
-
     # Dimensionality reduction (FOR MS2!)
     if args.use_pca:
         raise NotImplementedError("This will be useful for MS2.")
@@ -50,9 +62,13 @@ def main(args):
     
     # Follow the "DummyClassifier" example for your methods
     if args.method == "dummy_classifier":
-        method_obj =  DummyClassifier(arg1=1, arg2=2)
+        method_obj = DummyClassifier(arg1=1, arg2=2)
 
-    elif ...:  ### WRITE YOUR CODE HERE
+    elif args.method == "logistic_regression":  
+        method_obj = LogisticRegression(lr = args.lr, max_iters = args.max_iters)
+
+    elif args.method == "svm":
+        method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
         pass
     
 
