@@ -19,6 +19,10 @@ class KMeans(object):
         """
         self.K = K
         self.max_iters = max_iters
+        self.distances = np.empty
+        self.cluster_assignments = np.empty
+        self.final_centers = np.empty
+        self.cluster_center_label = np.empty
 
     def k_means(self, data, max_iter=100):
         """
@@ -36,7 +40,23 @@ class KMeans(object):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
-        return centers, cluster_assignments
+
+        centers = self.init_centers(data)
+
+        for i in range(max_iter):
+            old_centers = centers.copy()
+            self.compute_distance(data, old_centers)
+            self.find_closest_cluster()
+            centers = self.compute_centers(data)
+
+            if np.all(centers == old_centers):
+                break
+
+        self.final_centers = centers
+        self.compute_distance(data, old_centers)
+        self.find_closest_cluster()
+
+        return centers, self.cluster_assignments
     
     def fit(self, training_data, training_labels):
         """
@@ -56,7 +76,11 @@ class KMeans(object):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
-        return self.predict(training_data)
+
+        self.k_means(training_data)
+        self.assign_labels_to_centers(self.final_centers, training_labels)
+        
+        return self.predict_with_centers(training_data, self.final_centers)
 
     def predict(self, test_data):
         """
@@ -75,4 +99,53 @@ class KMeans(object):
         #### WRITE YOUR CODE HERE! 
         ###
         ##
+        self.compute_distance(test_data, self.final_centers)
+        self.find_closest_cluster()
+        pred_labels = self.predict_with_centers(test_data, self.final_centers)
         return pred_labels
+    
+    def init_centers(self, data):
+        
+        centers = np.random.permutation(data)[:self.K,]
+        return centers
+
+    def compute_distance(self, data, centers):
+
+        N = data.shape[0]
+        K = centers.shape[0]
+
+        self.distances = np.zeros((N, K))
+
+        for k in range(K):
+            self.distances[:,k] = np.sqrt(np.sum((data - centers[k]) ** 2 , axis=1))
+
+
+    def find_closest_cluster(self):
+
+        self.cluster_assignments = np.argmin(self.distances, axis=1)
+    
+    def compute_centers(self, data):
+
+        centers = np.zeros((self.K, np.shape(data)[1]))
+
+        for k in range(self.K):
+            mask = self.cluster_assignments == k
+            centers[k] = np.sum(data[mask], axis=0) / np.sum(np.array(mask, dtype=int))
+
+        return centers
+
+    def assign_labels_to_centers(self, centers, true_labels):
+        K = np.shape(centers)[0]
+        self.cluster_center_label = np.zeros(K)
+        for k in range(K):
+            self.cluster_center_label[k] = np.argmax(np.bincount(true_labels[self.cluster_assignments == k]))
+
+    def predict_with_centers(self, data, centers):
+        N = np.shape(data)[0]
+        new_labels = np.zeros((N,))
+        self.compute_distance(data, centers)
+        self.find_closest_cluster()
+        for i in range(N):
+            new_labels[i] = self.cluster_center_label[self.cluster_assignments[i]]
+
+        return new_labels
