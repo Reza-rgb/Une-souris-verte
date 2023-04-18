@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 import torch
 from torch.utils.data import DataLoader
+from matplotlib import pyplot as plt
 
 from src.data import load_data
 from src.methods.dummy_methods import DummyClassifier
@@ -61,7 +62,8 @@ def main(args):
         method_obj = LogisticRegression(lr=args.lr, max_iters=args.max_iters)
 
     elif args.method == "svm":
-        method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
+        method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma,
+                         degree=args.svm_degree, coef0=args.svm_coef0)
         pass
 
     ## 4. Train and evaluate the method
@@ -82,6 +84,55 @@ def main(args):
     print(f"Test set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
 
     ### WRITE YOUR CODE HERE if you want to add other outputs, visualization, etc.
+    # Cross validation
+    method_cross = method_obj
+    if args.method == "logistic_regression":
+        print("Not implemented yet")
+    elif args.method == "svm":
+        top_perf_svm = [args.svm_c, 'linear', args.svm_gamma, args.svm_degree, args.svm_coef0]
+        best_acc = accuracy_fn(method_obj.predict(xvalid), yvalid)
+
+        range_c = [1, 50, 100, 500, 1000, 10000]  # range(0.001, 10, 0.001)
+        range_gamma = [1, 50, 100, 500, 1000]#range(1, 1001)
+        range_degree = np.arange(15)#range(0, 101)
+        range_coef0 = np.arange(5)#range(1, 1001) #naze
+
+        for c in range_c:
+            test_perf_svm = SVM(C=c, kernel='linear')
+            test_perf_svm.fit(xtrain, ytrain)
+            valid_acc = accuracy_fn(test_perf_svm.predict(xvalid), yvalid)
+            print(f"Accuracy : {valid_acc} (C = {c}, kernel = linear)\n")
+            if (valid_acc > best_acc):
+                top_perf_svm = [c, 'linear', 0, 0, 0]
+                print(f"We have a new best accuracy : {valid_acc} (C = {c}, kernel = linear)\n")
+
+
+        #for c in range_c: (AROUND 10% ACCURACY => NOT INTERESTING !
+        #    for gamma in range_gamma:
+        #        test_perf_svm = SVM(C=c, kernel='rbf', gamma=gamma)
+        #        test_perf_svm.fit(xtrain, ytrain)
+        #        valid_acc = accuracy_fn(test_perf_svm.predict(xvalid), yvalid)
+        #        print(f"Accuracy : {valid_acc} (C = {c}, kernel = rbf, gamma = {gamma})\n")
+        #        if (valid_acc > best_acc):
+        #            print(f"We have a new best accuracy : {valid_acc} (C = {c}, kernel = rbf, gamma = {gamma})\n")
+        #            top_perf_svm = [c, 'rbf', gamma, 0, 0]
+        #            best_acc = valid_acc
+
+        for c in range_c:
+            for gamma in range_gamma:
+                for degree in range_degree:
+                    for coef0 in range_coef0:
+                        test_perf_svm = SVM(C=c, kernel='poly', gamma=gamma, degree=degree, coef0=coef0)
+                        test_perf_svm.fit(xtrain, ytrain)
+                        valid_acc = accuracy_fn(test_perf_svm.predict(xvalid), yvalid)
+                        print(f"Accuracy : {valid_acc} "
+                              f"(C = {c}, kernel = poly, gamma = {gamma}, degree = {degree}, coef0 = {coef0})\n")
+                        if (valid_acc > best_acc):
+                            print(f"We have a new best accuracy : {valid_acc} "
+                                  f"(C = {c}, kernel = poly, gamma = {gamma}, degree = {degree}, coef0 = {coef0})\n")
+                            top_perf_svm = [c, 'poly', gamma, degree, coef0]
+                            best_acc = valid_acc
+        pass
 
 
 if __name__ == '__main__':
