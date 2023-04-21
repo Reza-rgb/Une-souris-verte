@@ -32,12 +32,11 @@ def main(args):
 
     # Normalisation
 
-    means_train = xtrain.mean(0, keepdims=True)
-    stds_train = xtrain.std(0, keepdims=True)
+    means_val = np.mean(xtrain, axis=0, keepdims=True)
+    stds_val = np.std(xtrain, keepdims=True)
 
-    xtrain = (xtrain - means_train) / stds_train
-    xtest = (xtest - means_train) / stds_train
-
+    xtrain = (xtrain - means_val) / stds_val
+    xtest = (xtest - means_val) / stds_val
 
     cross_xtrain = np.copy(xtrain)
     cross_ytrain = np.copy(ytrain)
