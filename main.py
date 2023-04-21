@@ -40,11 +40,9 @@ def main(args):
     cross_xtrain = np.copy(xtrain)
     cross_ytrain = np.copy(ytrain)
 
-
     # Suffle of the training data
     indices = np.random.permutation(xtrain.shape[0])
     xtrain, ytrain = xtrain[indices, :], ytrain[indices]
-
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
@@ -54,7 +52,6 @@ def main(args):
         
         xtrain, xvalid = xtrain[:limit, :], xtrain[limit:, :]
         ytrain, yvalid = ytrain[:limit], ytrain[limit:]
-
 
     # Dimensionality reduction (FOR MS2!)
     if args.use_pca:
@@ -113,7 +110,6 @@ def main(args):
             plt.ylabel("Accuracy")
             plt.title("Accuracy as a function of the learning rate for the logistic regression")
             plt.show()
-
         elif args.method == "svm":
             top_param_svm_linear = [1]
             best_acc_linear = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=1, kernel='linear')
@@ -125,8 +121,8 @@ def main(args):
             top_param_svm_rbf = [1, 1]  # c, gamma
             best_acc_rbf = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=1, kernel='rbf', gamma=1)
 
-            range_c = [1, 50, 100, 500, 1000, 10000]
-            range_gamma = [0.001, 0.01, 0.1, 1, 50]
+            range_c = [0.25, 0.5, 1, 50, 100, 500]
+            range_gamma = [0.001, 0.01, 0.1, 1, 10]
             range_degree = np.arange(7)
             range_coef0 = np.arange(1)
 
@@ -215,22 +211,19 @@ def main(args):
             plt.xlabel("C (with gamma=1, degree=1 and coef0=0)")
             plt.ylabel("Accuracy (in percentage)")
             plt.show()
-
             # plot poly
             # plt.plot(degree_range, acc_poly)
             # plt.title("Accuracy as a function of the degree for polynomial kernel")
             # plt.xlabel("Degree (with C=500, gamma=1, coef0=0)")
             # plt.ylabel("Accuracy (in percentage)")
             # plt.show()
-
             # plot rbf
             # plt.plot(gamma_range, acc_rbf)
             # plt.title("Accuracy as a function of gamma for RBF kernel")
             # plt.xlabel("Gamma (with C=500, coef0=0)")
             # plt.ylabel("Accuracy (in percentage)")
             # plt.show()
-
-        else: 
+        else:
             k_axis = []
             accuracy_axis = []
             better_accuracy = 0
@@ -279,7 +272,6 @@ def main(args):
     acc = accuracy_fn(preds, ytest)
     macrof1 = macrof1_fn(preds, ytest)
     print(f"Test set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
-
 
 def KFold_cross_validation_SVM(X, Y, K, c, kernel, gamma=1, degree=0, coef0=0):
     '''
