@@ -31,7 +31,6 @@ def main(args):
     #  normalize, add bias, etc.
 
     # Normalisation
-
     means_val = np.mean(xtrain, axis=0, keepdims=True)
     stds_val = np.std(xtrain, keepdims=True)
 
@@ -41,9 +40,11 @@ def main(args):
     cross_xtrain = np.copy(xtrain)
     cross_ytrain = np.copy(ytrain)
 
+
     # Suffle of the training data
     indices = np.random.permutation(xtrain.shape[0])
     xtrain, ytrain = xtrain[indices, :], ytrain[indices]
+
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
@@ -54,8 +55,7 @@ def main(args):
         xtrain, xvalid = xtrain[:limit, :], xtrain[limit:, :]
         ytrain, yvalid = ytrain[:limit], ytrain[limit:]
 
-        
-    
+
     # Dimensionality reduction (FOR MS2!)
     if args.use_pca:
         raise NotImplementedError("This will be useful for MS2.")
@@ -85,11 +85,11 @@ def main(args):
     # Cross validation
 
     if not args.test:
-        bestAccuracy = 0
-        bestLr = 0
-        learningRateRange = [0.00000000001 + (0.001-0.00000000001)/250* x for x in range(0, 250)]
-        accuracies = []
         if args.method == "logistic_regression":
+            bestAccuracy = 0
+            bestLr = 0
+            learningRateRange = [0.00000000001 + (0.001-0.00000000001)/250* x for x in range(0, 250)]
+            accuracies = []
             for lr_temp in learningRateRange:
                 method_obj_temp = LogisticRegression(lr = lr_temp, max_iters = args.max_iters)
                 preds_train = method_obj_temp.fit(xtrain, ytrain)
@@ -113,6 +113,7 @@ def main(args):
             plt.ylabel("Accuracy")
             plt.title("Accuracy as a function of the learning rate for the logistic regression")
             plt.show()
+
         elif args.method == "svm":
             top_param_svm_linear = [1]
             best_acc_linear = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=1, kernel='linear')
@@ -213,21 +214,22 @@ def main(args):
             plt.xlabel("C (with gamma=1, degree=1 and coef0=0)")
             plt.ylabel("Accuracy (in percentage)")
             plt.show()
+
             # plot poly
             # plt.plot(degree_range, acc_poly)
             # plt.title("Accuracy as a function of the degree for polynomial kernel")
             # plt.xlabel("Degree (with C=500, gamma=1, coef0=0)")
             # plt.ylabel("Accuracy (in percentage)")
             # plt.show()
+
             # plot rbf
             # plt.plot(gamma_range, acc_rbf)
             # plt.title("Accuracy as a function of gamma for RBF kernel")
             # plt.xlabel("Gamma (with C=500, coef0=0)")
             # plt.ylabel("Accuracy (in percentage)")
             # plt.show()
+
         else: 
-            
-    
             k_axis = []
             accuracy_axis = []
             better_accuracy = 0
@@ -277,7 +279,6 @@ def main(args):
     macrof1 = macrof1_fn(preds, ytest)
     print(f"Test set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
 
-    ### WRITE YOUR CODE HERE if you want to add other outputs, visualization, etc.
 
 def KFold_cross_validation_SVM(X, Y, K, c, kernel, gamma=1, degree=0, coef0=0):
     '''
@@ -346,5 +347,3 @@ if __name__ == '__main__':
     # which can be accessed as "args.data", for example.
     args = parser.parse_args()
     main(args)
-
-#def cross_validation():
