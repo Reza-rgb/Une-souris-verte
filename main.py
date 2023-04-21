@@ -2,7 +2,6 @@ import argparse
 
 import numpy as np 
 import torch
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
 from src.data import load_data
@@ -11,6 +10,7 @@ from src.methods.kmeans import KMeans
 from src.methods.logistic_regression import LogisticRegression
 from src.methods.svm import SVM
 from src.utils import normalize_fn, append_bias_term, accuracy_fn, macrof1_fn
+import matplotlib.pyplot as plt 
  
 def main(args):
     """
@@ -71,47 +71,13 @@ def main(args):
     elif args.method == "svm":
         method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
         pass
-
     
+
     ## 4. Train and evaluate the method
 
-    # Cross validation
-
-    #python main.py --data dataset_HASYv2  --method logistic_regression
-
-    if not args.test:
-        bestAccuracy = 0
-        bestLr = 0
-        learningRateRange = [0.000000001 + (0.00003-0.000000001)/100* x for x in range(0, 100)]
-        accuracies = []
-        if args.method == "logistic_regression":
-            for lr_temp in learningRateRange:
-                method_obj_temp = LogisticRegression(lr = lr_temp, max_iters = args.max_iters)
-                preds_train = method_obj_temp.fit(xtrain, ytrain)
-                preds_valid = method_obj_temp.predict(xvalid)
-                accuracy = accuracy_fn(preds_valid, yvalid)
-                accuracies.append(accuracy)
-                if accuracy > bestAccuracy:
-                    print(f"\nNew best validation set accuracy with lr = {lr_temp:.6f}: accuracy = {accuracy:.3f}")
-                    bestAccuracy = accuracy
-                    bestLr = lr_temp
-                else:
-                    pass
-                    #print(f"\nValidation set accuracy with lr = {lr_temp}: accuracy = {accuracy:.3f}")
-            method_obj = LogisticRegression(lr = bestLr, max_iters = args.max_iters)
-            preds_train = method_obj.fit(xtrain, ytrain)
-
-            axes = plt.gca()
-            axes.set_ylim(0, 100)
-            plt.plot(learningRateRange, accuracies)
-            plt.xlabel("Learning rate")
-            plt.ylabel("Accuracy")
-            plt.title("Accuracy as a function of the learning rate for the logistic regression")
-            plt.show()
-    else :
-        preds_train = method_obj.fit(xtrain, ytrain) 
-            
-
+    # Fit (:=train) the method on the training data
+    preds_train = method_obj.fit(xtrain, ytrain)
+        
     # Predict on unseen data
     preds = method_obj.predict(xtest)
 
