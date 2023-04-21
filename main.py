@@ -223,6 +223,41 @@ def main(args):
             # plt.xlabel("Gamma (with C=500, coef0=0)")
             # plt.ylabel("Accuracy (in percentage)")
             # plt.show()
+        else: 
+            method_obj = KMeans(K=20, max_iters=10)
+    
+            k_axis = []
+            accuracy_axis = []
+            better_accuracy = 0
+            better_k = 0
+            for k in range(1, 100):
+                method_obj.K = k
+                preds_train = method_obj.fit(xtrain, ytrain)
+                preds = method_obj.predict(xvalid)
+                accuracy_with_a_certain_k = accuracy_fn(method_obj.predict(xvalid), yvalid)
+                k_axis.append(k)
+                accuracy_axis.append(accuracy_with_a_certain_k)
+                acc = accuracy_fn(preds_train, ytrain)
+                macrof1 = macrof1_fn(preds_train, ytrain)
+                print(f"\nTrain set: accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
+
+                acc = accuracy_fn(preds, yvalid)
+                macrof1 = macrof1_fn(preds, yvalid)
+                print(f"Validation set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
+                if (accuracy_with_a_certain_k > better_accuracy):
+                    better_accuracy = accuracy_with_a_certain_k
+                    print(better_accuracy)
+                    better_k = k
+            print(better_k)
+            plt.plot(k_axis, accuracy_axis)
+            plt.xlabel("K")
+            plt.ylabel("accuracy")
+            plt.title("accuracy on validation data in function of hyperparameter K")
+            plt.show()
+
+            method_obj.K = better_k
+        
+            preds_train = method_obj.fit(xtrain, ytrain)
     else :
         preds_train = method_obj.fit(xtrain, ytrain) 
             
