@@ -89,7 +89,7 @@ def main(args):
     if not args.test:
         bestAccuracy = 0
         bestLr = 0
-        learningRateRange = [0.000000001 + (0.00003-0.000000001)/100* x for x in range(0, 100)]
+        learningRateRange = [0.00000000001 + (0.001-0.00000000001)/1000* x for x in range(0, 1000)]
         accuracies = []
         if args.method == "logistic_regression":
             for lr_temp in learningRateRange:
