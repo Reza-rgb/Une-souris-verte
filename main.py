@@ -26,6 +26,9 @@ def main(args):
     xtrain = xtrain.reshape(xtrain.shape[0], -1)
     xtest = xtest.reshape(xtest.shape[0], -1)
 
+    cross_xtrain = np.copy(xtrain)
+    cross_ytrain = np.copy(ytrain)
+
     ## 2. Then we must prepare it. This is were you can create a validation set,
     #  normalize, add bias, etc.
 
@@ -84,56 +87,173 @@ def main(args):
     print(f"Test set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
 
     ### WRITE YOUR CODE HERE if you want to add other outputs, visualization, etc.
+    # Plot
+    if args.method == "logistic_regression":
+        print("Not implemented yet")
+    else: #args.method == "svm":
+        c_default = 500
+
+        c_range = np.arange(0.001, 10, 0.2)
+        acc_linear = []
+
+        degree_range = np.arange(13)
+        acc_poly = []
+
+        gamma_range = [0.001 * x for x in np.arange(11)]
+        acc_rbf = []
+
+        for c in c_range:
+            print(c)
+            svm_linear = SVM(c, 'linear')
+            svm_linear.fit(xtrain, ytrain)
+            acc_linear.append(accuracy_fn(svm_linear.predict(xtest), ytest))
+
+        print("Linear kernel finished...")
+
+        for d in degree_range:
+            print(d)
+            svm_poly = SVM(C=c_default, kernel='poly', degree=d)
+            svm_poly.fit(xtrain, ytrain)
+            acc_poly.append(accuracy_fn(svm_poly.predict(xtest), ytest))
+
+        print("Polynomial kernel finished...")
+
+        for g in gamma_range:
+            svm_rbf = SVM(C=c_default, kernel='rbf', gamma=g)
+            svm_rbf.fit(xtrain, ytrain)
+            acc_rbf.append(accuracy_fn(svm_rbf.predict(xtest), ytest))
+
+        print("RBF kernel finished !")
+
+        # plot linear
+        plt.plot(c_range, acc_linear)
+        plt.title("Accuracy as a function of C for linear kernel")
+        plt.xlabel("C (with gamma=1, degree=1 and coef0=0)")
+        plt.ylabel("Accuracy (in percentage)")
+        plt.show()
+        # plot poly
+        #plt.plot(degree_range, acc_poly)
+        #plt.title("Accuracy as a function of the degree for polynomial kernel")
+        #plt.xlabel("Degree (with C=500, gamma=1, coef0=0)")
+        #plt.ylabel("Accuracy (in percentage)")
+        #plt.show()
+        # plot rbf
+        #plt.plot(gamma_range, acc_rbf)
+        #plt.title("Accuracy as a function of gamma for RBF kernel")
+        #plt.xlabel("Gamma (with C=500, coef0=0)")
+        #plt.ylabel("Accuracy (in percentage)")
+        #plt.show()
+
+
     # Cross validation
     method_cross = method_obj
     if args.method == "logistic_regression":
         print("Not implemented yet")
     elif args.method == "svm":
-        top_perf_svm = [args.svm_c, 'linear', args.svm_gamma, args.svm_degree, args.svm_coef0]
-        best_acc = accuracy_fn(method_obj.predict(xvalid), yvalid)
+        top_param_svm_linear = [1]
+        best_acc_linear = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3,  c=1, kernel='linear')
 
-        range_c = [1, 50, 100, 500, 1000, 10000]  # range(0.001, 10, 0.001)
-        range_gamma = [1, 50, 100, 500, 1000]#range(1, 1001)
-        range_degree = np.arange(15)#range(0, 101)
-        range_coef0 = np.arange(5)#range(1, 1001) #naze
+        top_param_svm_poly = [1, 1, 0, 0] #c, gamma, degree, coef0
+        best_acc_poly = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3,
+                                                   c=1, kernel='poly', gamma=1, degree=0)
+
+        top_param_svm_rbf = [1, 1] #c, gamma
+        best_acc_rbf = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=1, kernel='rbf', gamma=1)
+
+        range_c = [1, 50, 100, 500, 1000, 10000]
+        range_gamma = [0.001, 0.01, 0.1, 1, 50]
+        range_degree = np.arange(7)
+        range_coef0 = np.arange(1) #naze
 
         for c in range_c:
-            test_perf_svm = SVM(C=c, kernel='linear')
-            test_perf_svm.fit(xtrain, ytrain)
-            valid_acc = accuracy_fn(test_perf_svm.predict(xvalid), yvalid)
-            print(f"Accuracy : {valid_acc} (C = {c}, kernel = linear)\n")
-            if (valid_acc > best_acc):
-                top_perf_svm = [c, 'linear', 0, 0, 0]
-                print(f"We have a new best accuracy : {valid_acc} (C = {c}, kernel = linear)\n")
-
-
-        #for c in range_c: (AROUND 10% ACCURACY => NOT INTERESTING !
-        #    for gamma in range_gamma:
-        #        test_perf_svm = SVM(C=c, kernel='rbf', gamma=gamma)
-        #        test_perf_svm.fit(xtrain, ytrain)
-        #        valid_acc = accuracy_fn(test_perf_svm.predict(xvalid), yvalid)
-        #        print(f"Accuracy : {valid_acc} (C = {c}, kernel = rbf, gamma = {gamma})\n")
-        #        if (valid_acc > best_acc):
-        #            print(f"We have a new best accuracy : {valid_acc} (C = {c}, kernel = rbf, gamma = {gamma})\n")
-        #            top_perf_svm = [c, 'rbf', gamma, 0, 0]
-        #            best_acc = valid_acc
+            acc_val = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=c, kernel='linear')
+            print(f"Accuracy : {acc_val} (C = {c}, kernel = linear)\n")
+            if acc_val > best_acc_linear:
+                top_param_svm_linear = [c]
+                best_acc_linear = acc_val
+                print(f"We have a new best accuracy : {acc_val} (C = {c}, kernel = linear)\n")
 
         for c in range_c:
             for gamma in range_gamma:
                 for degree in range_degree:
                     for coef0 in range_coef0:
-                        test_perf_svm = SVM(C=c, kernel='poly', gamma=gamma, degree=degree, coef0=coef0)
-                        test_perf_svm.fit(xtrain, ytrain)
-                        valid_acc = accuracy_fn(test_perf_svm.predict(xvalid), yvalid)
-                        print(f"Accuracy : {valid_acc} "
+                        acc_val = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=c,
+                                                             kernel='poly', gamma=gamma, degree=degree, coef0=coef0)
+                        print(f"Accuracy : {acc_val} "
                               f"(C = {c}, kernel = poly, gamma = {gamma}, degree = {degree}, coef0 = {coef0})\n")
-                        if (valid_acc > best_acc):
-                            print(f"We have a new best accuracy : {valid_acc} "
+                        if acc_val > best_acc_poly:
+                            print(f"We have a new best accuracy : {acc_val} "
                                   f"(C = {c}, kernel = poly, gamma = {gamma}, degree = {degree}, coef0 = {coef0})\n")
-                            top_perf_svm = [c, 'poly', gamma, degree, coef0]
-                            best_acc = valid_acc
+                            top_param_svm_poly = [c, gamma, degree, coef0]
+                            best_acc_poly = acc_val
+
+        for c in range_c:
+            for gamma in range_gamma:
+                acc_val = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=c,
+                                                     kernel='rbf', gamma=gamma)
+                print(f"Accuracy : {acc_val} "
+                      f"(C = {c}, kernel = rbf, gamma = {gamma})\n")
+                if acc_val > best_acc_rbf:
+                    print(f"We have a new best accuracy : {acc_val} "
+                          f"(C = {c}, kernel = rbf, gamma = {gamma})\n")
+                    top_param_svm_rbf = [c, gamma]
+                    best_acc_rbf = acc_val
+
+        print(f"The best accuracy for SVM with a linear kernel was {best_acc_linear} "
+              f"(reached for C = {top_param_svm_linear[0]})\n")
+
+        print(f"The best accuracy for SVM with a polynomial kernel was {best_acc_poly} "
+              f"(reached for C = {top_param_svm_poly[0]}, gamma = {top_param_svm_poly[1]}, "
+              f"degree = {top_param_svm_poly[2]}, coef0 = {top_param_svm_poly[3]})\n")
+
+        print(f"The best accuracy for SVM with RBF kernel was {best_acc_rbf} "
+              f"(reached for C = {top_param_svm_rbf[0]}, gamma = {top_param_svm_rbf[1]})\n")
         pass
 
+
+
+
+
+def KFold_cross_validation_SVM(X, Y, K, c, kernel, gamma=1, degree=0, coef0=0):
+    '''
+    K-Fold Cross validation function for K-NN
+
+    Inputs:
+        X : training data, shape (NxD)
+        Y: training labels, shape (N,)
+        K: number of folds (K in K-fold)
+    Returns:
+        Average validation accuracy for the selected hyperparameters.
+    '''
+    N = X.shape[0]
+
+    accuracies = []  # list of accuracies
+    for fold_ind in range(K):
+        # Split the data into training and validation folds:
+
+        # all the indices of the training dataset
+        all_ind = np.arange(N)
+        split_size = N // K
+
+        # Indices of the validation and training examples
+        val_ind = all_ind[fold_ind * split_size: (fold_ind + 1) * split_size]
+        train_ind = np.setdiff1d(all_ind, val_ind)
+
+        X_train_fold = X[train_ind, :]
+        Y_train_fold = Y[train_ind]
+        X_val_fold = X[val_ind, :]
+        Y_val_fold = Y[val_ind]
+
+        # Run KNN using the data folds you found above.
+        model = SVM(C=c, kernel=kernel, gamma=gamma, degree=degree, coef0=coef0)
+        model.fit(X_train_fold, Y_train_fold)
+        Y_val_fold_pred = model.predict(X_val_fold)
+        acc = accuracy_fn(Y_val_fold_pred, Y_val_fold)
+        accuracies.append(acc)
+
+    # Find the average validation accuracy over K:
+    ave_acc = np.sum(accuracies) / K
+    return ave_acc
 
 if __name__ == '__main__':
     # Definition of the arguments that can be given through the command line (terminal).
@@ -166,4 +286,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-# def cross_validation():
+
