@@ -34,11 +34,9 @@ def main(args):
 
     means_train = xtrain.mean(0, keepdims=True)
     stds_train = xtrain.std(0, keepdims=True)
-    means_test = xtest.mean(0, keepdims=True)
-    stds_test = xtest.std(0, keepdims=True)
 
     xtrain = (xtrain - means_train) / stds_train
-    xtest = (xtest - means_test) / stds_test
+    xtest = (xtest - means_train) / stds_train
 
 
     cross_xtrain = np.copy(xtrain)
