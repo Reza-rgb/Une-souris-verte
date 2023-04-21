@@ -19,10 +19,10 @@ class KMeans(object):
         """
         self.K = K
         self.max_iters = max_iters
-        self.distances = np.empty
-        self.cluster_assignments = np.empty
-        self.final_centers = np.empty
-        self.cluster_center_label = np.empty
+        #self.distances = np.empty
+        #self.cluster_assignments = np.empty
+        #self.final_centers = np.empty
+        #self.cluster_center_label = np.empty
 
     def k_means(self, data, max_iter=100):
         """
