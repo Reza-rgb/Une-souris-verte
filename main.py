@@ -2,7 +2,6 @@ import argparse
 
 import numpy as np 
 import torch
-import matplotlib.pyplot as plt 
 from torch.utils.data import DataLoader
 
 from src.data import load_data
@@ -42,7 +41,7 @@ def main(args):
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
-        ratio = 0.8
+        ratio = 0.7
         N = xtrain.shape[0]
         limit = (int) (ratio * N)
         
@@ -66,51 +65,19 @@ def main(args):
     if args.method == "dummy_classifier":
         method_obj = DummyClassifier(arg1=1, arg2=2)
 
-    elif args.method == "logistic_regression":  
+    elif args.method == "logistic_regression":
         method_obj = LogisticRegression(lr = args.lr, max_iters = args.max_iters)
 
     elif args.method == "svm":
         method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
-    else:
-        method_obj = KMeans(K=20, max_iters=10)
+        pass
     
+
     ## 4. Train and evaluate the method
 
     # Fit (:=train) the method on the training data
-    #if ():
-    # k_axis = []
-    # accuracy_axis = []
-    # better_accuracy = 0
-    # better_k = 0
-    # for k in range(1, 100):
-    #     method_obj.K = k
-    #     preds_train = method_obj.fit(xtrain, ytrain)
-    #     preds = method_obj.predict(xvalid)
-    #     accuracy_with_a_certain_k = accuracy_fn(method_obj.predict(xvalid), yvalid)
-    #     k_axis.append(k)
-    #     accuracy_axis.append(accuracy_with_a_certain_k)
-    #     acc = accuracy_fn(preds_train, ytrain)
-    #     macrof1 = macrof1_fn(preds_train, ytrain)
-    #     print(f"\nTrain set: accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
-
-    #     acc = accuracy_fn(preds, yvalid)
-    #     macrof1 = macrof1_fn(preds, yvalid)
-    #     print(f"Validation set:  accuracy = {acc:.3f}% - F1-score = {macrof1:.6f}")
-    #     if (accuracy_with_a_certain_k > better_accuracy):
-    #         better_accuracy = accuracy_with_a_certain_k
-    #         print(better_accuracy)
-    #         better_k = k
-    # print(better_k)
-    # plt.plot(k_axis, accuracy_axis)
-    # plt.xlabel("K")
-    # plt.ylabel("accuracy")
-    # plt.title("accuracy on validation data in function of hyperparameter K")
-    # plt.show()
-    better_k = 50
-
-    method_obj.K = better_k
-        
     preds_train = method_obj.fit(xtrain, ytrain)
+        
     # Predict on unseen data
     preds = method_obj.predict(xtest)
 
