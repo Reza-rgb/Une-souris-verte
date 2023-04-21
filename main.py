@@ -77,7 +77,8 @@ def main(args):
 
     elif args.method == "svm":
         method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
-        pass
+    else:
+        method_obj = KMeans(K=20, max_iters=10)
 
     
     ## 4. Train and evaluate the method
@@ -228,7 +229,7 @@ def main(args):
             # plt.ylabel("Accuracy (in percentage)")
             # plt.show()
         else: 
-            method_obj = KMeans(K=20, max_iters=10)
+            
     
             k_axis = []
             accuracy_axis = []
