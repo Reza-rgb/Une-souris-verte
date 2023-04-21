@@ -75,7 +75,7 @@ def main(args):
         method_obj = LogisticRegression(lr = args.lr, max_iters = args.max_iters)
 
     elif args.method == "svm":
-        method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
+        method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma, degree=args.svm_degree, coef0=args.svm_coef0)
     else:
         method_obj = KMeans(K=20, max_iters=10)
 
@@ -207,6 +207,7 @@ def main(args):
 
             print("RBF kernel finished !")
 
+            ## uncomment one of the three blocks to plot a kernel
             # plot linear
             plt.plot(c_range, acc_linear)
             plt.title("Accuracy as a function of C for linear kernel")
