@@ -2,6 +2,7 @@ import argparse
 
 import numpy as np 
 import torch
+import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 
 from src.data import load_data
@@ -40,7 +41,7 @@ def main(args):
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
-        ratio = 0.8
+        ratio = 0.7
         N = xtrain.shape[0]
         limit = (int) (ratio * N)
         
@@ -64,19 +65,52 @@ def main(args):
     if args.method == "dummy_classifier":
         method_obj = DummyClassifier(arg1=1, arg2=2)
 
-    elif args.method == "logistic_regression":  
+    elif args.method == "logistic_regression":
         method_obj = LogisticRegression(lr = args.lr, max_iters = args.max_iters)
 
     elif args.method == "svm":
         method_obj = SVM(C=args.svm_c, kernel=args.svm_kernel, gamma=args.svm_gamma)
         pass
-    
 
+    
     ## 4. Train and evaluate the method
 
-    # Fit (:=train) the method on the training data
-    preds_train = method_obj.fit(xtrain, ytrain)
+    # Cross validation
+
+    #python main.py --data dataset_HASYv2  --method logistic_regression
+
+    bestAccuracy = 0
+    bestLr = 0
+    learningRateRange = [0.000005*x for x in range(1, 180)]
+    accuracies = []
+    if args.method == "logistic_regression":
+        for lr_temp in learningRateRange:
+            method_obj_temp = LogisticRegression(lr = lr_temp, max_iters = args.max_iters)
+            preds_train = method_obj_temp.fit(xtrain, ytrain)
+            preds_valid = method_obj_temp.predict(xvalid)
+            accuracy = accuracy_fn(preds_valid, yvalid)
+            accuracies.append(accuracy)
+            if accuracy > bestAccuracy:
+                print(f"\nNew best validation set accuracy with lr = {lr_temp}: accuracy = {accuracy:.3f}")
+                bestAccuracy = accuracy
+                bestLr = lr_temp
+            else:
+                print(f"\nValidation set accuracy with lr = {lr_temp}: accuracy = {accuracy:.3f}")
+        method_obj = LogisticRegression(lr = bestLr, max_iters = args.max_iters)
+        preds_train = method_obj.fit(xtrain, ytrain)
+
+        plt.plot(learningRateRange, accuracies)
+        plt.xlabel("Learning rate")
+        plt.ylabel("Accuracy")
+        plt.title("Accuracy as a function of the learning rate for the logistic regression")
+        plt.show()
+
+        # Fit (:=train) the method on the training data
         
+
+        # 
+            
+
     # Predict on unseen data
     preds = method_obj.predict(xtest)
 
