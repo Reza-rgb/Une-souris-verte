@@ -30,6 +30,8 @@ def main(args):
     ## 2. Then we must prepare it. This is were you can create a validation set,
     #  normalize, add bias, etc.
 
+    # Normalisation
+
     means_train = xtrain.mean(0, keepdims=True)
     stds_train = xtrain.std(0, keepdims=True)
     means_test = xtest.mean(0, keepdims=True)
