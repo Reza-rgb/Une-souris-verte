@@ -82,7 +82,7 @@ def main(args):
     if not args.test:
         bestAccuracy = 0
         bestLr = 0
-        learningRateRange = [0.0000001 + 0.00001*x for x in range(0, 90)]
+        learningRateRange = [0.0000001 + (0.0003-0.0000001)/250* x for x in range(0, 250)]
         accuracies = []
         if args.method == "logistic_regression":
             for lr_temp in learningRateRange:
@@ -92,11 +92,12 @@ def main(args):
                 accuracy = accuracy_fn(preds_valid, yvalid)
                 accuracies.append(accuracy)
                 if accuracy > bestAccuracy:
-                    print(f"\nNew best validation set accuracy with lr = {lr_temp}: accuracy = {accuracy:.3f}")
+                    print(f"\nNew best validation set accuracy with lr = {lr_temp:.6f}: accuracy = {accuracy:.3f}")
                     bestAccuracy = accuracy
                     bestLr = lr_temp
                 else:
-                    print(f"\nValidation set accuracy with lr = {lr_temp}: accuracy = {accuracy:.3f}")
+                    pass
+                    #print(f"\nValidation set accuracy with lr = {lr_temp}: accuracy = {accuracy:.3f}")
             method_obj = LogisticRegression(lr = bestLr, max_iters = args.max_iters)
             preds_train = method_obj.fit(xtrain, ytrain)
 
@@ -106,15 +107,12 @@ def main(args):
             plt.xlabel("Learning rate")
             plt.ylabel("Accuracy")
             plt.title("Accuracy as a function of the learning rate for the logistic regression")
-            plt.annotate(f"best accuracy = {bestAccuracy:.2f}", xy=(bestLr, bestAccuracy), xytext=(bestLr-0.00015, bestAccuracy+5),
+            plt.annotate(f"best accuracy = {bestAccuracy:.2f}", xy=(bestLr, bestAccuracy), xytext=(bestLr, bestAccuracy+5),
                 arrowprops=dict(facecolor='black', shrink=0.005),
                 )
             plt.show()
-
-        # Fit (:=train) the method on the training data
-        
-
-        # 
+    else :
+        preds_train = method_obj.fit(xtrain, ytrain) 
             
 
     # Predict on unseen data
