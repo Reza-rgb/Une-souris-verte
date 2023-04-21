@@ -84,8 +84,6 @@ def main(args):
 
     # Cross validation
 
-    #python main.py --data dataset_HASYv2  --method logistic_regression
-
     if not args.test:
         bestAccuracy = 0
         bestLr = 0
