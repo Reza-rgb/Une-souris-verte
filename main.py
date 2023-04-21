@@ -82,7 +82,7 @@ def main(args):
     if not args.test:
         bestAccuracy = 0
         bestLr = 0
-        learningRateRange = [0.0000001 + (0.0003-0.0000001)/250* x for x in range(0, 250)]
+        learningRateRange = [0.000000001 + (0.00003-0.000000001)/100* x for x in range(0, 100)]
         accuracies = []
         if args.method == "logistic_regression":
             for lr_temp in learningRateRange:
@@ -107,9 +107,6 @@ def main(args):
             plt.xlabel("Learning rate")
             plt.ylabel("Accuracy")
             plt.title("Accuracy as a function of the learning rate for the logistic regression")
-            plt.annotate(f"best accuracy = {bestAccuracy:.2f}", xy=(bestLr, bestAccuracy), xytext=(bestLr, bestAccuracy+5),
-                arrowprops=dict(facecolor='black', shrink=0.005),
-                )
             plt.show()
     else :
         preds_train = method_obj.fit(xtrain, ytrain) 
