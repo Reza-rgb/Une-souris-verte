@@ -26,21 +26,25 @@ def main(args):
     xtrain = xtrain.reshape(xtrain.shape[0], -1)
     xtest = xtest.reshape(xtest.shape[0], -1)
 
-    cross_xtrain = np.copy(xtrain)
-    cross_ytrain = np.copy(ytrain)
-
 
     ## 2. Then we must prepare it. This is were you can create a validation set,
     #  normalize, add bias, etc.
 
+    means_train = xtrain.mean(0, keepdims=True)
+    stds_train = xtrain.std(0, keepdims=True)
+    means_test = xtest.mean(0, keepdims=True)
+    stds_test = xtest.std(0, keepdims=True)
 
-    # TODO: Normalization of the data
+    xtrain = (xtrain - means_train) / stds_train
+    xtest = (xtest - means_test) / stds_test
 
+
+    cross_xtrain = np.copy(xtrain)
+    cross_ytrain = np.copy(ytrain)
 
     # Suffle of the training data
     indices = np.random.permutation(xtrain.shape[0])
     xtrain, ytrain = xtrain[indices, :], ytrain[indices]
-
 
     # Make a validation set (it can overwrite xtest, ytest)
     if not args.test:
@@ -125,7 +129,7 @@ def main(args):
             range_c = [1, 50, 100, 500, 1000, 10000]
             range_gamma = [0.001, 0.01, 0.1, 1, 50]
             range_degree = np.arange(7)
-            range_coef0 = np.arange(1)  # naze
+            range_coef0 = np.arange(1)
 
             for c in range_c:
                 acc_val = KFold_cross_validation_SVM(X=cross_xtrain, Y=cross_ytrain, K=3, c=c, kernel='linear')
